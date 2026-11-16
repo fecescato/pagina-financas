@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Legendas TikTok</title>
+<style>
+  :root { --fundo:#0b0f14; --card:#151b23; --texto:#e8ecf1; --suave:#9aa4b2; --verde:#00c86e; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--fundo); color:var(--texto); font:16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width:640px; margin:0 auto; padding:24px 16px 48px; }
+  h1 { font-size:1.4rem; margin:0 0 4px; }
+  .sub { color:var(--suave); margin:0 0 20px; font-size:.9rem; }
+  .card { background:var(--card); border-radius:14px; padding:16px; margin-bottom:16px; }
+  .meta { color:var(--suave); font-size:.8rem; margin-bottom:4px; }
+  .titulo { font-weight:700; margin-bottom:10px; }
+  pre { white-space:pre-wrap; word-wrap:break-word; font:inherit; font-size:.95rem; margin:0 0 14px; color:#d6dce4; }
+  button { width:100%; border:0; border-radius:10px; padding:14px; font:700 1rem system-ui, sans-serif;
+           background:var(--verde); color:#05140c; cursor:pointer; }
+  button.ok { background:#2b3440; color:var(--texto); }
+  .vazio { color:var(--suave); text-align:center; padding:40px 0; }
+  .card.novo { outline:2px solid var(--verde); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Legendas do TikTok</h1>
+  <p class="sub">A mais nova fica em cima. Toque em Copiar, abra o rascunho no TikTok e cole.</p>
+  <div id="lista"><p class="vazio">Carregando…</p></div>
+</main>
+<script>
+  function copiar(texto, botao) {
+    function feito() { botao.textContent = "Copiado ✓"; botao.classList.add("ok"); }
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(texto).then(feito, function () { reserva(texto); feito(); });
+    } else { reserva(texto); feito(); }
+  }
+  function reserva(texto) {
+    var t = document.createElement("textarea");
+    t.value = texto; t.style.position = "fixed"; t.style.opacity = "0";
+    document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove();
+  }
+  fetch("legendas.json?t=" + Date.now()).then(function (r) { return r.ok ? r.json() : []; })
+    .catch(function () { return []; })
+    .then(function (itens) {
+      var lista = document.getElementById("lista");
+      lista.innerHTML = "";
+      if (!itens.length) { lista.innerHTML = '<p class="vazio">Nenhuma legenda ainda.</p>'; return; }
+      itens.forEach(function (it, i) {
+        var card = document.createElement("div");
+        card.className = "card" + (i === 0 ? " novo" : "");
+        var meta = document.createElement("div"); meta.className = "meta"; meta.textContent = "Enviado " + it.enviado;
+        var tit = document.createElement("div"); tit.className = "titulo"; tit.textContent = it.titulo;
+        var pre = document.createElement("pre"); pre.textContent = it.legenda;
+        var btn = document.createElement("button"); btn.textContent = "Copiar legenda";
+        btn.onclick = function () { copiar(it.legenda, btn); };
+        card.append(meta, tit, pre, btn);
+        lista.appendChild(card);
+      });
+    });
+</script>
+</body>
+</html>
